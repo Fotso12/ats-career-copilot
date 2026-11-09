@@ -1,0 +1,25 @@
+OFFRE D'EMPLOI : Développeur Backend Java / Spring Boot (H/F)
+
+Entreprise : FinTech Solutions International
+Localisation : Douala / Remote partiel
+Contrat : Stage de pré-embauche / CDI Junior
+
+À propos du poste :
+Dans le cadre de l'extension de notre plateforme de services financiers et de paiement, nous recherchons un Développeur Backend Java / Spring Boot passionné par la conception d'architectures résilientes et hautement disponibles.
+
+Vos missions :
+- Participer à la conception et au développement de microservices sous Java 21 et Spring Boot 3.
+- Concevoir et optimiser les schémas de base de données PostgreSQL avec migrations automatisées.
+- Mettre en œuvre une politique de cache distribué sous Redis pour réduire la latence sur les transactions sensibles.
+- Mettre en place des flux de messages asynchrones et d'événements avec Apache Kafka ou RabbitMQ.
+- Assurer la sécurité des APIs (Spring Security, OAuth2 / JWT, gestion des rôles).
+- Rédiger des tests automatisés robustes (JUnit 5, Mockito) avec une exigence de couverture supérieure à 80%.
+- Conteneuriser les applications avec Docker et participer aux pipelines CI/CD sous GitHub Actions.
+
+Profil recherché :
+- Formation Bac+4 / Bac+5 en Informatique ou Génie Logiciel.
+- Excellente maîtrise du langage Java et du framework Spring Boot (Data JPA, Security, Web).
+- Bonnes connaissances en SQL (PostgreSQL), indexation et requêtes complexes.
+- Expérience ou intérêt marqué pour les technologies de cache (Redis) et de streaming (Kafka).
+- Sensibilité prononcée pour le Clean Code, les principes SOLID et le TDD.
+- Maîtrise de Git et des environnements Linux.

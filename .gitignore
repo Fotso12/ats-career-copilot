@@ -1,0 +1,7 @@
+node_modules/
+.env
+outputs/prompt_pour_claude_*
+outputs/cv_adapte_*
+!outputs/.gitkeep
+.DS_Store
+*.log

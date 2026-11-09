@@ -1,0 +1,27 @@
+{
+  "name": "ats-career-copilot",
+  "version": "1.0.0",
+  "description": "Agent IA d'analyse d'offres d'emploi, optimisation de CV ATS et générateur de mini-projets GitHub pour combler les compétences manquantes.",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "ats-copilot": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "copilot": "node index.js",
+    "test-offer": "node index.js examples/offre_stage_java_spring.txt"
+  },
+  "keywords": [
+    "ai",
+    "career",
+    "ats-optimization",
+    "resume-builder",
+    "gemini",
+    "claude",
+    "job-matcher",
+    "github-portfolio"
+  ],
+  "author": "Darryl Fotso <tamofotso90@gmail.com> (https://github.com/Fotso12)",
+  "license": "MIT"
+}
