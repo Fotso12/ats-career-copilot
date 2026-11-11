@@ -1,108 +1,199 @@
-# 🚀 ATS Career Copilot — AI-Powered Job Matching & Skill Gap Booster
+# ATS Career Copilot
 
-[![Node.js](https://img.shields.io/badge/Node.js-20%2B-green.svg)]()
-[![AI Engine](https://img.shields.io/badge/AI%20Engine-Gemini%20%2F%20Claude-blue.svg)]()
-[![ATS Score](https://img.shields.io/badge/ATS%20Optimized-100%25-brightgreen.svg)]()
-[![License](https://img.shields.io/badge/license-MIT-purple.svg)]()
-[![Author](https://img.shields.io/badge/Author-Darryl%20Fotso-orange.svg)](https://github.com/Fotso12)
+Outil en ligne de commande qui analyse une offre d'emploi, mesure l'écart avec un profil de compétences, puis produit un diagnostic ATS, un CV adapté et un plan de mini-projet pour combler les compétences manquantes.
 
-> **Agent IA autonome pour l'adaptation chirurgicale de CV aux exigences ATS (Applicant Tracking Systems), détection d'écarts techniques et génération de blueprints de projets GitHub.**
+Le projet fonctionne sans dépendance externe et sans clé API. Il peut aussi appeler un service d'IA si une clé est fournie.
 
----
+## Sommaire
 
-## 🎯 Problématique résolue
+- [Fonctionnalités](#fonctionnalités)
+- [Fonctionnement](#fonctionnement)
+- [Architecture](#architecture)
+- [Prérequis](#prérequis)
+- [Installation](#installation)
+- [Utilisation](#utilisation)
+- [Format du fichier d'offre](#format-du-fichier-doffre)
+- [Modes d'exécution](#modes-dexécution)
+- [Sorties générées](#sorties-générées)
+- [Export PDF compatible ATS](#export-pdf-compatible-ats)
+- [Personnalisation](#personnalisation)
+- [Limites connues](#limites-connues)
+- [Licence](#licence)
+- [Auteur](#auteur)
 
-Les systèmes de filtrage automatique (**ATS** tels que Workday, Taleo, Greenhouse) rejettent plus de 75% des candidatures tech parce que :
-1. Les mots-clés exacts de l'offre ne figurent pas dans le CV.
-2. Le format du CV contient des tableaux, barres ou doubles colonnes illisibles par les parsers.
-3. Il manque une technologie clé exigée par l'entreprise sans preuve concrète sur GitHub.
+## Fonctionnalités
 
-**ATS Career Copilot** résout ces trois problèmes grâce à une architecture en 3 étapes :
-* **Diagnostic & Gap Analysis :** Comparaison instantanée entre le profil candidat et l'offre d'emploi.
-* **Skill Gap Booster :** Conception d'un mini-projet GitHub concret (2-3 jours) prouvant la maîtrise de la technologie manquante.
-* **CV sur mesure 100% ATS-Ready :** Génération d'un CV optimisé à 1 colonne, avec métriques chiffrées et intégration naturelle des mots-clés.
+- Analyse locale des mots-clés, sans appel réseau.
+- Score d'adéquation estimé entre le profil et l'offre.
+- Liste des technologies déjà présentes dans le profil.
+- Liste des technologies demandées par l'offre mais absentes du profil.
+- Génération de trois livrables :
+  - un diagnostic ATS avec les mots-clés à renforcer ;
+  - un blueprint de mini-projet GitHub pour chaque compétence manquante ;
+  - un CV complet au format Markdown, sur une page, en une seule colonne.
+- Deux modes de génération : sans clé API ou avec clé API.
+- Modèle Typst prêt à l'emploi pour produire un PDF lisible par les robots de recrutement.
+- Aucune bibliothèque à installer.
 
----
+## Fonctionnement
 
-## 🏗️ Architecture du Projet
+1. Le programme charge le dossier de compétences `data/PROFILE_MASTER.md`.
+2. Il charge le texte de l'offre d'emploi fourni en argument.
+3. Il compare les deux documents avec un catalogue de technologies défini dans `src/ats_analyzer.js`. La comparaison se fait mot entier, sans distinction de casse.
+4. Il calcule un score :
+
+   ```text
+   score = technologies présentes dans les deux documents / technologies détectées dans l'offre * 100
+   ```
+
+5. Il construit un prompt complet à partir de `src/prompts.js`.
+6. Il appelle le service d'IA si une clé est disponible. Sinon, il écrit le prompt dans `outputs/` pour un usage manuel.
+
+## Architecture
 
 ```text
 ats-career-copilot/
-├── data/
-│   └── PROFILE_MASTER.md          # Base de connaissances exhaustive du candidat
-├── templates/
-│   ├── resume_template.typ        # Template Typst pour export PDF vectoriel parfait ATS
-│   └── cv_markdown_template.md    # Modèle Markdown 1 colonne
-├── src/
-│   ├── prompts.js                 # Définition des méta-prompts ATS & Gap Booster
-│   ├── ats_analyzer.js            # Analyseur heuristique local de mots-clés (Offline)
-│   └── copilot.js                 # Moteur IA (Google Gemini API / Claude / Offline)
-├── examples/
-│   └── offre_stage_java_spring.txt # Exemple d'offre d'emploi réelle pour test
-├── outputs/                       # Dossier de sortie des diagnostics, CVs et blueprints
-├── copilot.ps1                    # Lanceur rapide Windows PowerShell
-├── index.js                       # Point d'entrée CLI
-└── package.json
+  data/
+    PROFILE_MASTER.md            Dossier de compétences du candidat
+  examples/
+    offre_stage_java_spring.txt  Offre d'emploi d'exemple
+  outputs/                       Diagnostics, CV et prompts générés
+  src/
+    ats_analyzer.js              Analyse locale des mots-clés et calcul du score
+    copilot.js                   Chargement des fichiers, appels API, écriture des sorties
+    prompts.js                   Instructions envoyées au service d'IA
+  templates/
+    resume_template.typ          Modèle Typst pour un PDF ATS en une colonne
+  copilot.ps1                    Lanceur Windows PowerShell
+  index.js                       Point d'entrée en ligne de commande
+  package.json
 ```
 
----
+## Prérequis
 
-## ⚡ Guide de Démarrage Rapide
+- Node.js 18 ou supérieur. La version 18 est le minimum car le projet utilise `fetch` nativement.
+- Aucun compte payant n'est nécessaire.
+- Facultatif : une clé API si vous voulez la génération automatique.
+- Facultatif : un éditeur Typst ou le site typst.app pour produire le PDF.
 
-### 1. Prérequis
-* **Node.js** (version 18 ou supérieure). Aucun paquet payant n'est requis.
+## Installation
 
-### 2. Lancer l'analyse sur une offre d'emploi
+```bash
+git clone https://github.com/Fotso12/ats-career-copilot.git
+cd ats-career-copilot
+node --version
+```
 
-Placez le texte de l'offre dans un fichier texte (ex: `ma_nouvelle_offre.txt`), puis lancez :
+Le projet n'a aucune dépendance, donc `npm install` n'est pas nécessaire.
+
+## Utilisation
+
+Placez le texte complet de l'offre dans un fichier `.txt`, puis lancez l'une des commandes suivantes.
 
 ```bash
 # Avec npm
 npm start ma_nouvelle_offre.txt
 
-# Ou directement avec Node.js
+# Directement avec Node.js
 node index.js ma_nouvelle_offre.txt
 
-# Ou sous Windows PowerShell
+# Sous Windows PowerShell
 .\copilot.ps1 ma_nouvelle_offre.txt
 ```
 
----
+Sans argument, le programme utilise l'offre d'exemple `examples/offre_stage_java_spring.txt`.
 
-## 🤖 Modes d'Exécution de l'IA (100% Gratuit)
+```bash
+node index.js
+```
 
-### Option A : Mode Sans Clé API (100% Gratuit & Hors-Ligne)
-Si aucune variable d'environnement n'est définie :
-1. L'outil analyse instantanément les mots-clés en local.
-2. Il compile et génère un fichier prêt à l'emploi : `outputs/prompt_pour_claude_YYYY-MM-DD.md`.
-3. Il vous suffit de copier-coller ce contenu dans [Claude.ai](https://claude.ai) (gratuit) ou ChatGPT pour recevoir en 30 secondes votre diagnostic, votre projet GitHub et votre CV adapté.
+La console affiche le score, les technologies trouvées, les technologies manquantes, puis le chemin du fichier généré.
 
-### Option B : Mode Tout-en-Un Automatique avec Google Gemini API (100% Gratuit)
-Vous pouvez automatiser l'appel direct à l'IA avec une clé gratuite **Google AI Studio** :
-1. Obtenez une clé gratuite sur [Google AI Studio](https://aistudio.google.com/).
-2. Définissez la variable d'environnement :
-   ```bash
-   # Windows PowerShell
-   $env:GEMINI_API_KEY = "votre_cle_gemini"
+## Format du fichier d'offre
 
-   # Linux / macOS
-   export GEMINI_API_KEY="votre_cle_gemini"
-   ```
-3. Relancez `node index.js ma_nouvelle_offre.txt` : le CV adapté et le blueprint de projet sont rédigés et sauvegardés automatiquement dans `outputs/` !
+- Fichier texte brut, encodage UTF-8.
+- Collez l'annonce entière, y compris le titre, les missions et le profil recherché.
+- Un fichier par offre. Le nom du fichier n'a pas d'importance.
+- Les formats PDF, DOCX et HTML ne sont pas lus directement. Convertissez le contenu en texte avant l'analyse.
 
----
+## Modes d'exécution
 
-## 📄 Export PDF Garanti 100% ATS-Friendly
+### Mode sans clé API
 
-Pour convertir le CV généré en PDF sans risque de rejet par les ATS :
-1. Rendez-vous sur [Typst App](https://typst.app/) (gratuit dans le navigateur).
-2. Ouvrez le fichier `templates/resume_template.typ`.
-3. Ajustez les puces avec celles générées par l'agent IA et téléchargez votre PDF vectoriel.
+C'est le mode par défaut et il ne coûte rien.
 
----
+1. L'analyse locale s'exécute normalement.
+2. Le programme écrit un fichier de prompt horodaté dans `outputs/`. Son nom exact est affiché dans la console.
+3. Ouvrez ce fichier, copiez son contenu intégral et collez-le dans l'assistant conversationnel de votre choix.
+4. L'assistant renvoie le diagnostic ATS, le blueprint du mini-projet et le CV adapté.
 
-## 👨‍💻 Auteur & Licence
+Ce mode convient si vous n'avez pas de clé ou si vous préférez choisir vous-même le service utilisé.
 
-Développé par **[Darryl Fotso](https://github.com/Fotso12)**  
-Email : tamofotso90@gmail.com  
-Licence : **MIT** (Libre d'utilisation et d'adaptation).
+### Mode avec clé API
+
+Le programme reconnaît deux variables d'environnement, une par fournisseur pris en charge. Les noms exacts sont lus dans `src/copilot.js`, dans la fonction `runCopilot`. Ouvrez ce fichier et repérez les deux appels à `process.env`.
+
+Définissez la variable correspondant au fournisseur dont vous disposez.
+
+```powershell
+# Windows PowerShell
+$env:NOM_DE_LA_VARIABLE = "votre_cle"
+node index.js ma_nouvelle_offre.txt
+```
+
+```bash
+# Linux ou macOS
+export NOM_DE_LA_VARIABLE="votre_cle"
+node index.js ma_nouvelle_offre.txt
+```
+
+Si les deux variables sont définies, le fournisseur vérifié en premier dans le code est utilisé. En cas d'erreur d'appel, le programme bascule automatiquement en mode sans clé et écrit le prompt dans `outputs/`.
+
+Ne versionnez jamais vos clés. Le fichier `.env` est déjà ignoré par Git.
+
+## Sorties générées
+
+Toutes les sorties sont écrites dans `outputs/` avec un horodatage.
+
+| Fichier | Contenu |
+| --- | --- |
+| `cv_adapte_<horodatage>.md` | Diagnostic, blueprint et CV produits par le service d'IA |
+| Fichier de prompt horodaté | Instructions complètes à copier dans un assistant conversationnel |
+
+Le dossier `outputs/` est ignoré par Git, sauf le fichier `.gitkeep`. Vos CV et vos prompts restent donc locaux.
+
+## Export PDF compatible ATS
+
+Le fichier `templates/resume_template.typ` contient une mise en page en une seule colonne, sans tableau ni barre de progression, avec des titres de sections standards.
+
+1. Ouvrez typst.app ou votre éditeur Typst local.
+2. Chargez `templates/resume_template.typ`.
+3. Remplacez le contenu par les sections du CV généré.
+4. Exportez en PDF.
+
+Le PDF produit contient du texte sélectionnable, ce qui permet aux robots de recrutement d'extraire correctement le contenu.
+
+## Personnalisation
+
+- `data/PROFILE_MASTER.md` : source de vérité du candidat. Mettez-le à jour avant chaque candidature.
+- `src/ats_analyzer.js` : catalogue `TECH_CATALOG`. Ajoutez les technologies que vous voulez détecter.
+- `src/prompts.js` : instructions et structure des trois livrables.
+- `templates/resume_template.typ` : nom, coordonnées, ordre des sections et couleurs.
+
+## Limites connues
+
+- L'analyse locale repose sur une correspondance de mots entiers. Une technologie écrite différemment dans l'offre peut ne pas être détectée.
+- Le score est une estimation interne, pas une note officielle d'un logiciel de recrutement.
+- Le programme ne lit que des fichiers texte.
+- Le programme ne génère pas de PDF. La conversion se fait avec Typst.
+- Le contenu généré doit toujours être relu. Aucun diplôme, aucune entreprise et aucune expérience ne doit être inventé.
+
+## Licence
+
+MIT. Utilisation, modification et redistribution libres, avec conservation de la mention de licence.
+
+## Auteur
+
+Darryl Fotso
+GitHub : https://github.com/Fotso12
+Email : tamofotso90@gmail.com
